@@ -142,6 +142,7 @@ func usage() {
 func main() {
 	log.SetPrefix("humphrey: ")
 	log.SetFlags(0)
+	flag.Usage = usage
 	flag.Parse()
 
 	if flag.NArg() == 0 {
