@@ -19,7 +19,7 @@ import (
 )
 
 // humphrey -tmpl "{{.key|println}}{{range .img}}{{.|println}}{{end}}" -page http://www.oldpicsarchive.com/10-colorized-photos-a
-// udrey-hepburn "img:.pagination a:href" | humphrey -tmpl "{{.img|println}}" "img:.post-single-content img:src"
+// udrey-hepburn "img/.pagination a/href" | humphrey -tmpl "{{.img|println}}" "img/.post-single-content img/src"
 
 // rule represents a parsing rule for an html page
 // Selector is a css selector. The parser applies the selector
@@ -35,7 +35,7 @@ type rule struct {
 // newRule builds a new rule from text. The three parts
 // should be separated by a colon
 func newRule(s string) (*rule, error) {
-	toks := strings.SplitN(s, ":", 3)
+	toks := strings.SplitN(s, "/", 3)
 	switch len(toks) {
 	case 2:
 		return &rule{toks[0], toks[1], ""}, nil
@@ -133,7 +133,7 @@ var arrays = flag.Bool("arrays", false, "Always store the result as array. Mostl
 func usage() {
 	fmt.Fprintf(os.Stderr, "usage: humphrey [options] [rules]\n")
 	fmt.Fprintf(os.Stderr, "rules:\n")
-	fmt.Fprintf(os.Stderr, "  key:selector[:attribute]\n")
+	fmt.Fprintf(os.Stderr, "  key/selector[/attribute]\n")
 	fmt.Fprintf(os.Stderr, "options:\n")
 	flag.PrintDefaults()
 	os.Exit(2)
