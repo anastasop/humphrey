@@ -1,6 +1,6 @@
 module github.com/anastasop/humphrey
 
-go 1.22.1
+go 1.24
 
 require github.com/PuerkitoBio/goquery v1.9.2
 
