@@ -83,7 +83,13 @@ func (r *rule) apply(doc *goquery.Document, m map[string]interface{}, as_array b
 // It returns a non-nil error if downloading fails
 // or the http response code is not 200
 func download(u string) (io.Reader, error) {
-	resp, err := http.Get(u)
+	req, err := http.NewRequest("GET", u, nil)
+	if err != nil {
+		return nil, err
+	}
+	req.Header.Set("User-Agent", "Mozilla/5.0 (X11; Linux x86_64; rv:109.0) Gecko/20100101 Firefox/115.0")
+
+	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
 		return nil, err
 	}
