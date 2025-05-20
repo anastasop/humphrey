@@ -1,7 +1,6 @@
 package main
 
 import (
-	"bufio"
 	"bytes"
 	"encoding/json"
 	"flag"
@@ -116,8 +115,7 @@ func downloadAndApplyRules(u string, rules []*rule) (map[string]interface{}, err
 
 var key = flag.String("key", "key", "the name for the url in output map")
 var tmpl = flag.String("tmpl", "", "a text/template for output instead of json")
-var page = flag.String("page", "", "the url to scrap. If not set it reads all lines from stdin")
-var strict = flag.Bool("strict", true, "If a urls fails then stop the program")
+var page = flag.String("page", "", "the url to scrap")
 
 func usage() {
 	fmt.Fprintf(os.Stderr, "usage: humphrey [options] [rules]\n")
@@ -135,6 +133,10 @@ func main() {
 	flag.Parse()
 
 	if flag.NArg() == 0 {
+		usage()
+	}
+
+	if *page == "" {
 		usage()
 	}
 
@@ -161,36 +163,20 @@ func main() {
 		enc.SetIndent("", "  ")
 	}
 
-	var m map[string]interface{}
-	var err error
+	m, err := downloadAndApplyRules(*page, rules)
+	if err != nil {
+		log.Fatal(err)
+	}
+	m[*key] = *page
 
-	var scanner *bufio.Scanner
-	if *page != "" {
-		scanner = bufio.NewScanner(bytes.NewBufferString(*page))
-	} else {
-		scanner = bufio.NewScanner(os.Stdin)
-	}
-	for scanner.Scan() {
-		u := strings.TrimSpace(scanner.Text())
-		m, err = downloadAndApplyRules(u, rules)
-		if err == nil {
-			m[*key] = u
-			if t != nil {
-				if err := t.Execute(os.Stdout, m); err != nil {
-					log.Fatal(err)
-				}
-			} else if enc != nil {
-				if err := enc.Encode(m); err != nil {
-					log.Fatal(err)
-				}
-			}
-		} else {
-			if *strict {
-				log.Fatal(err)
-			}
+
+	if t != nil {
+		if err := t.Execute(os.Stdout, m); err != nil {
+			log.Fatal(err)
 		}
-	}
-	if err := scanner.Err(); err != nil {
-		log.Fatal("reading standard input:", err)
+	} else if enc != nil {
+		if err := enc.Encode(m); err != nil {
+			log.Fatal(err)
+		}
 	}
 }
