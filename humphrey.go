@@ -16,13 +16,10 @@ import (
 	"github.com/PuerkitoBio/goquery"
 )
 
-// humphrey -tmpl "{{.key|println}}{{range .img}}{{.|println}}{{end}}" -page http://www.oldpicsarchive.com/10-colorized-photos-a
-// udrey-hepburn "img/.pagination a/href" | humphrey -tmpl "{{.img|println}}" "img/.post-single-content img/src"
-
-// rule represents a parsing rule for an html page
+// rule represents a parsing rule for an html page.
 // Selector is a css selector. The parser applies the selector
 // to the html and extracts the text of the elements matched
-// or the text of the named Attributes if present.
+// or the text of the named Attribute if present.
 // Name is the key of the result for the generated result map.
 type rule struct {
 	Name      string
@@ -30,8 +27,8 @@ type rule struct {
 	Attribute string
 }
 
-// newRule builds a new rule from text. The three parts
-// should be separated by a colon
+// newRule builds a new rule from a string containing the three parts
+// separated by a slash for example links/a or links/a/href .
 func newRule(s string) (*rule, error) {
 	toks := strings.SplitN(s, "/", 3)
 	switch len(toks) {
@@ -43,7 +40,7 @@ func newRule(s string) (*rule, error) {
 	return nil, fmt.Errorf("can't parse rule: %s", s)
 }
 
-// apply the rule to the document and write the resulting array to map.
+// apply aplpies the rule to the document and write the resulting array to map.
 func (r *rule) apply(doc *goquery.Document, m map[string]interface{}) {
 	vals := make([]string, 0)
 
@@ -62,10 +59,8 @@ func (r *rule) apply(doc *goquery.Document, m map[string]interface{}) {
 	m[r.Name] = vals
 }
 
-// download uses the http to download the page of url u
-// and returns the results as an io.Reader
-// It returns a non-nil error if downloading fails
-// or the http response code is not 200
+// download fetches the page of u and returns it as an io.Reader.
+// Expects to get an HTTP 200.
 func download(u string) (io.Reader, error) {
 	req, err := http.NewRequest("GET", u, nil)
 	if err != nil {
@@ -92,8 +87,7 @@ func download(u string) (io.Reader, error) {
 	return bytes.NewReader(b), nil
 }
 
-// downloadAndApplyRules tries to download the url u and apply the rules
-// it return error if download or parsing fails
+// downloadAndApplyRules tries to download the url u and apply the rules.
 func downloadAndApplyRules(u string, rules []*rule) (map[string]interface{}, error) {
 	r, err := download(u)
 	if err != nil {
