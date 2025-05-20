@@ -11,7 +11,6 @@ import (
 	"net/http"
 	"os"
 	"strings"
-	"text/template"
 
 	"github.com/PuerkitoBio/goquery"
 )
@@ -108,7 +107,6 @@ func downloadAndApplyRules(u string, rules []*rule) (map[string]interface{}, err
 }
 
 var key = flag.String("key", "key", "the name for the url in output map")
-var tmpl = flag.String("tmpl", "", "a text/template for output instead of json")
 var page = flag.String("page", "", "the url to scrap")
 
 func usage() {
@@ -143,34 +141,16 @@ func main() {
 		}
 	}
 
-	var t *template.Template
-	var enc *json.Encoder
-	if *tmpl != "" {
-		tt, err := template.New("output").Parse(*tmpl)
-		if err != nil {
-			log.Fatal(err)
-		}
-		t = tt
-	} else {
-		enc = json.NewEncoder(os.Stdout)
-		enc.SetEscapeHTML(false)
-		enc.SetIndent("", "  ")
-	}
-
 	m, err := downloadAndApplyRules(*page, rules)
 	if err != nil {
 		log.Fatal(err)
 	}
 	m[*key] = *page
 
-
-	if t != nil {
-		if err := t.Execute(os.Stdout, m); err != nil {
-			log.Fatal(err)
-		}
-	} else if enc != nil {
-		if err := enc.Encode(m); err != nil {
-			log.Fatal(err)
-		}
+	enc := json.NewEncoder(os.Stdout)
+	enc.SetEscapeHTML(false)
+	enc.SetIndent("", "  ")
+	if err := enc.Encode(m); err != nil {
+		log.Fatal(err)
 	}
 }
