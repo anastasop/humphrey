@@ -132,7 +132,6 @@ func downloadAndApplyRules(u string, rules []*rule, as_array bool) (map[string]i
 var key = flag.String("key", "key", "the name for the url in output map")
 var tmpl = flag.String("tmpl", "", "a text/template for output instead of json")
 var page = flag.String("page", "", "the url to scrap. If not set it reads all lines from stdin")
-var pretty = flag.Bool("pretty", false, "pretty print json")
 var strict = flag.Bool("strict", true, "If a urls fails then stop the program")
 var arrays = flag.Bool("arrays", false, "Always store the result as array. Mostly useful with templates")
 
@@ -175,9 +174,7 @@ func main() {
 	} else {
 		enc = json.NewEncoder(os.Stdout)
 		enc.SetEscapeHTML(false)
-		if *pretty {
-			enc.SetIndent("", "  ")
-		}
+		enc.SetIndent("", "  ")
 	}
 
 	var m map[string]interface{}
