@@ -86,8 +86,8 @@ func download(u string) (io.Reader, error) {
 	return bytes.NewReader(b), nil
 }
 
-// downloadAndApplyRules tries to download the url u and apply the rules.
-func downloadAndApplyRules(u string, rules []*rule) (map[string]interface{}, error) {
+// applyRules tries to download the url u and apply the rules.
+func applyRules(u string, rules []*rule) (map[string]interface{}, error) {
 	r, err := download(u)
 	if err != nil {
 		return nil, err
@@ -107,10 +107,9 @@ func downloadAndApplyRules(u string, rules []*rule) (map[string]interface{}, err
 }
 
 var key = flag.String("key", "key", "the name for the url in output map")
-var page = flag.String("page", "", "the url to scrap")
 
 func usage() {
-	fmt.Fprintf(os.Stderr, "usage: humphrey [options] [rules]\n")
+	fmt.Fprintf(os.Stderr, "usage: humphrey [options] rules... url\n")
 	fmt.Fprintf(os.Stderr, "rules:\n")
 	fmt.Fprintf(os.Stderr, "  key/selector[/attribute]\n")
 	fmt.Fprintf(os.Stderr, "options:\n")
@@ -124,28 +123,26 @@ func main() {
 	flag.Usage = usage
 	flag.Parse()
 
-	if flag.NArg() == 0 {
-		usage()
-	}
-
-	if *page == "" {
+	// we need at least one rule and the url
+	if flag.NArg() < 2 {
 		usage()
 	}
 
 	var rules []*rule
-	for _, s := range flag.Args() {
-		if r, err := newRule(s); err == nil {
+	for i := 0; i < flag.NArg() - 1; i++ {
+		if r, err := newRule(flag.Arg(i)); err == nil {
 			rules = append(rules, r)
 		} else {
 			log.Fatal(err)
 		}
 	}
+	page := flag.Arg(flag.NArg() - 1)
 
-	m, err := downloadAndApplyRules(*page, rules)
+	m, err := applyRules(page, rules)
 	if err != nil {
 		log.Fatal(err)
 	}
-	m[*key] = *page
+	m[*key] = page
 
 	enc := json.NewEncoder(os.Stdout)
 	enc.SetEscapeHTML(false)
