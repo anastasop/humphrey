@@ -45,15 +45,9 @@ func newRule(s string) (*rule, error) {
 	return nil, fmt.Errorf("can't parse rule: %s", s)
 }
 
-// apply the rule to the document and write the results to map
-// the result is stored according to options arrays. If true
-// it is always an array, maybe empty or with a single element.
-// Otherwise
-// if the rule selector matches only one element the result is a string
-// if it matches many elements, the result is an array.
-// if it matched nothing, the results is nil
-func (r *rule) apply(doc *goquery.Document, m map[string]interface{}, as_array bool) {
-	var vals []string
+// apply the rule to the document and write the resulting array to map.
+func (r *rule) apply(doc *goquery.Document, m map[string]interface{}) {
+	vals := make([]string, 0)
 
 	doc.Find(r.Selector).Each(func(i int, s *goquery.Selection) {
 		var val string
@@ -67,15 +61,7 @@ func (r *rule) apply(doc *goquery.Document, m map[string]interface{}, as_array b
 		vals = append(vals, html.UnescapeString(strings.TrimSpace(val)))
 	})
 
-	if as_array || len(vals) > 1 {
-		m[r.Name] = vals
-	} else {
-		if len(vals) == 0 {
-			m[r.Name] = nil
-		} else {
-			m[r.Name] = vals[0]
-		}
-	}
+	m[r.Name] = vals
 }
 
 // download uses the http to download the page of url u
@@ -110,7 +96,7 @@ func download(u string) (io.Reader, error) {
 
 // downloadAndApplyRules tries to download the url u and apply the rules
 // it return error if download or parsing fails
-func downloadAndApplyRules(u string, rules []*rule, as_array bool) (map[string]interface{}, error) {
+func downloadAndApplyRules(u string, rules []*rule) (map[string]interface{}, error) {
 	r, err := download(u)
 	if err != nil {
 		return nil, err
@@ -123,7 +109,7 @@ func downloadAndApplyRules(u string, rules []*rule, as_array bool) (map[string]i
 
 	m := make(map[string]interface{})
 	for _, rr := range rules {
-		rr.apply(doc, m, as_array)
+		rr.apply(doc, m)
 	}
 
 	return m, nil
@@ -133,7 +119,6 @@ var key = flag.String("key", "key", "the name for the url in output map")
 var tmpl = flag.String("tmpl", "", "a text/template for output instead of json")
 var page = flag.String("page", "", "the url to scrap. If not set it reads all lines from stdin")
 var strict = flag.Bool("strict", true, "If a urls fails then stop the program")
-var arrays = flag.Bool("arrays", false, "Always store the result as array. Mostly useful with templates")
 
 func usage() {
 	fmt.Fprintf(os.Stderr, "usage: humphrey [options] [rules]\n")
@@ -188,7 +173,7 @@ func main() {
 	}
 	for scanner.Scan() {
 		u := strings.TrimSpace(scanner.Text())
-		m, err = downloadAndApplyRules(u, rules, *arrays)
+		m, err = downloadAndApplyRules(u, rules)
 		if err == nil {
 			m[*key] = u
 			if t != nil {
