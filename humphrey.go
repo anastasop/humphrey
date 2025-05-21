@@ -107,6 +107,7 @@ func applyRules(u string, rules []*rule) (map[string]any, error) {
 }
 
 var key = flag.String("key", "key", "the name for the url in output map")
+var rawOutput = flag.Bool("r", false, "text output instead of json")
 
 func usage() {
 	fmt.Fprintf(os.Stderr, "usage: humphrey [options] rules... url\n")
@@ -144,10 +145,20 @@ func main() {
 	}
 	m[*key] = page
 
-	enc := json.NewEncoder(os.Stdout)
-	enc.SetEscapeHTML(false)
-	enc.SetIndent("", "  ")
-	if err := enc.Encode(m); err != nil {
-		log.Fatal(err)
+	if *rawOutput {
+		for _, r := range rules {
+			if strs, ok := m[r.Name].([]string); ok {
+				for _, s := range strs {
+					fmt.Println(s)
+				}
+			}
+		}
+	} else {
+		enc := json.NewEncoder(os.Stdout)
+		enc.SetEscapeHTML(false)
+		enc.SetIndent("", "  ")
+		if err := enc.Encode(m); err != nil {
+			log.Fatal(err)
+		}
 	}
 }
