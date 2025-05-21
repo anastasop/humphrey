@@ -112,7 +112,7 @@ func applyRules(m map[string]any, u string, rules []*rule) error {
 	return nil
 }
 
-var key = flag.String("key", "key", "the name for the url in output map")
+var key = flag.String("key", "", "the name for the url in output map")
 var rawOutput = flag.Bool("r", false, "text output instead of json")
 var ruleNames []string
 
@@ -154,7 +154,9 @@ func main() {
 	if err := applyRules(m, page, rules); err != nil {
 		log.Fatal(err)
 	}
-	m[*key] = page
+	if *key != "" {
+		m[*key] = page
+	}
 
 	if *rawOutput {
 		printRecursively(m)

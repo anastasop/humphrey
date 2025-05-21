@@ -11,7 +11,8 @@ rules:
   key/selector[/attribute]
 options:
   -key string
-       the name for the url in output map (default "key")
+       the name for the url in output map
+  -r   text output instead of json
 ```
 
 Each rule consists of 3 parts: key, css selector and optional attribute. Humphrey download the html of the url, parses it, applies the css selector and extracts the text of the elements matched or the text of the optional attribute. The output json object is of the form `{"key": values}` where `key` is the key of the rule and `values` is an array of strings for the matches. For example to get the list of repos (1st page) of the golang organization in github:
