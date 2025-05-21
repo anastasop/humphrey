@@ -129,7 +129,7 @@ func main() {
 	}
 
 	var rules []*rule
-	for i := 0; i < flag.NArg() - 1; i++ {
+	for i := 0; i < flag.NArg()-1; i++ {
 		if r, err := newRule(flag.Arg(i)); err == nil {
 			rules = append(rules, r)
 		} else {
