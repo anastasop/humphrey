@@ -29,14 +29,21 @@ type rule struct {
 // newRule builds a new rule from a string containing the three parts
 // separated by a slash for example links/a or links/a/href .
 func newRule(s string) (*rule, error) {
-	toks := strings.SplitN(s, "/", 3)
-	switch len(toks) {
-	case 2:
-		return &rule{toks[0], toks[1], ""}, nil
-	case 3:
-		return &rule{toks[0], toks[1], toks[2]}, nil
+	toks := strings.Split(s, "/")
+	if len(toks) != 2 && len(toks) != 3 {
+		return nil, fmt.Errorf("can't parse rule: %s", s)
 	}
-	return nil, fmt.Errorf("can't parse rule: %s", s)
+	if len(toks) == 2 {
+		toks = append(toks, "")
+	}
+	for i := 0; i < len(toks); i++ {
+		toks[i] = strings.TrimSpace(toks[i])
+	}
+	if toks[0] == "" || toks[1] == "" {
+		return nil, fmt.Errorf("rule %s has empty parts", s)
+	}
+
+	return &rule{toks[0], toks[1], toks[2]}, nil
 }
 
 // apply aplpies the rule to the document and write the resulting array to map.
