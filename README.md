@@ -6,7 +6,7 @@ Humphrey is a simple scraper for html pages, intended to be used in shell script
 The usage is very simple. It takes a list of css selectors, applies them to a url and outputs the results as json.
 
 ```
-usage: humphrey [options] rules... url
+usage: humphrey [options] rules... <url | file>
 rules:
   key/selector[/attribute]
 options:

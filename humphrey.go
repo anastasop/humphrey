@@ -95,9 +95,19 @@ func download(u string) (io.Reader, error) {
 
 // applyRules tries to download the url u and apply the rules.
 func applyRules(m map[string]any, u string, rules []*rule) error {
-	r, err := download(u)
-	if err != nil {
-		return err
+	var r io.Reader
+	if strings.HasPrefix(u, "http") {
+		if rr, err := download(u); err != nil {
+			return err
+		} else {
+			r = rr
+		}
+	} else {
+		if b, err := os.ReadFile(u); err != nil {
+			return err
+		} else {
+			r = bytes.NewReader(b)
+		}
 	}
 
 	doc, err := goquery.NewDocumentFromReader(r)
@@ -117,7 +127,7 @@ var rawOutput = flag.Bool("r", false, "text output instead of json")
 var ruleNames []string
 
 func usage() {
-	fmt.Fprintf(os.Stderr, "usage: humphrey [options] rules... url\n")
+	fmt.Fprintf(os.Stderr, "usage: humphrey [options] rules... <url | file>\n")
 	fmt.Fprintf(os.Stderr, "rules:\n")
 	fmt.Fprintf(os.Stderr, "  key/selector[/attribute]\n")
 	fmt.Fprintf(os.Stderr, "options:\n")
