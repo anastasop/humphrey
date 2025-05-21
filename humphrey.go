@@ -40,7 +40,7 @@ func newRule(s string) (*rule, error) {
 }
 
 // apply aplpies the rule to the document and write the resulting array to map.
-func (r *rule) apply(doc *goquery.Document, m map[string]interface{}) {
+func (r *rule) apply(doc *goquery.Document, m map[string]any) {
 	vals := make([]string, 0)
 
 	doc.Find(r.Selector).Each(func(i int, s *goquery.Selection) {
@@ -87,7 +87,7 @@ func download(u string) (io.Reader, error) {
 }
 
 // applyRules tries to download the url u and apply the rules.
-func applyRules(u string, rules []*rule) (map[string]interface{}, error) {
+func applyRules(u string, rules []*rule) (map[string]any, error) {
 	r, err := download(u)
 	if err != nil {
 		return nil, err
@@ -98,7 +98,7 @@ func applyRules(u string, rules []*rule) (map[string]interface{}, error) {
 		return nil, err
 	}
 
-	m := make(map[string]interface{})
+	m := make(map[string]any)
 	for _, rr := range rules {
 		rr.apply(doc, m)
 	}
