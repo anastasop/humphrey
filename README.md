@@ -35,9 +35,28 @@ Each rule consists of 3 parts: key, css selector and optional attribute. Humphre
 }
 ```
 
+Rule names can be nested using dots. For example:
+
+```
+% humphrey repos.name/a.f4 repos.link/a.f4/href http://github.com/golang
+{
+  "key": "http://github.com/golang",
+  "repos": [
+    {
+      "link": "/golang/go",
+      "name": "go"
+    },
+    {
+      "link": "/golang/tools",
+      "name": "tools"
+    },
+    {
+      "link": "/golang/pkgsite",
+      "name": "pkgsite"
+    },
+    ...
+```
+
 # Installation
 
 `go install github.com/anastasop/humphrey@latest`
-
-# TODO
-1. Groups results of rules to a single key, for example it would be useful to select links and get in the same object like `{href: "", text, ""}`
